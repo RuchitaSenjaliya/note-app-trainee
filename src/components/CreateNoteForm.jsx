@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function CreateNoteForm(props) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [color, setColor] = useState("");
+  const [color, setColor] = useState("#D4C2FF");
 
   const titleChangeHandler = (event) => {
     setTitle(event.target.value);
@@ -20,7 +20,14 @@ export default function CreateNoteForm(props) {
   const submitHandler = (event) => {
     event.preventDefault();
     props.formDataHandler(title, desc, color);
+    setTitle("");
+    setDesc("");
+    setColor("#D4C2FF");
   };
+
+  useEffect(() => {
+    localStorage.setItem("noteData", JSON.stringify(props.formData));
+  }, [props.formData]);
 
   return (
     <>

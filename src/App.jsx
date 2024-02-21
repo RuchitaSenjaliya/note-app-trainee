@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import CreateNoteForm from "./components/CreateNoteForm";
 import Navbar from "./components/Navbar";
 import Note from "./components/Note";
+import Model from "./components/Model";
+import { v4 as uuid } from "uuid";
 
 const DUMMY_DATA = [
   {
@@ -40,11 +42,21 @@ const DUMMY_DATA = [
 // 6: Don't allow to add empty note
 
 // TODOs:
-// 1. edit functionality
-// 2. store data in local storage
+// 1. capitalize fist letter of title and desc
+// 2. revise usestate, CRUD
+// 3. Trucate desc if length is more than 50 characters
+// 4. add dark mode
 
-const getLocalData = () => {
-  let notes = localStorage.getItem("noteData");
+// TODOs:
+// 1. store data in local storage
+// 2. edit functionality
+
+// what is useEffect hook ?
+
+// The useEffect hook in React is used to handle the side effects in React such as fetching data, and updating DOM. This hook runs on every render but there is also a way of using a dependency array using which we can control the effect of rendering
+
+const getLocalItems = () => {
+  let notes = localStorage.getItem("notesData");
   if (notes) {
     return JSON.parse(notes);
   } else {
@@ -53,33 +65,63 @@ const getLocalData = () => {
 };
 
 function App() {
-  const [formData, setFormData] = useState(getLocalData);
+  const [formData, setFormData] = useState(getLocalItems);
+  const [mode, setMode] = useState("dark");
+  const [isModelOpen, setIsModelOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
 
-  const formDataHandler = (title, description, color) => {
+  const toggleModeHandler = () => {
+    if (mode === "light") {
+      setMode("dark");
+    } else {
+      setMode("light");
+    }
+  };
+
+  const formDataHandler = (enteredData) => {
     setFormData((prev) => {
       return [
         ...prev,
         {
-          title: title,
-          desc: description,
-          color: color,
+          title: enteredData.title,
+          desc: enteredData.desc,
+          color: enteredData.color,
           date: new Date().toString(),
-          id: formData.length + 1,
+          id: uuid(),
         },
       ];
     });
     localStorage.setItem("notesData", JSON.stringify(formData));
   };
 
+  useEffect(() => {
+    localStorage.setItem("notesData", JSON.stringify(formData));
+  }, [formData]);
+
   const deleteHandler = (id) => {
     console.log(id);
     const filteredData = formData.filter((item) => item.id !== id);
     setFormData(filteredData);
-    console.log(filteredData);
+    setIsModelOpen(false);
   };
+
+  const openModel = (id) => {
+    setDeleteId(id);
+    setIsModelOpen(true);
+  };
+  const closeModel = () => {
+    setIsModelOpen(false);
+  };
+
   return (
     <>
-      <Navbar />
+      {isModelOpen && (
+        <Model
+          closeModel={closeModel}
+          deleteHandler={() => deleteHandler(deleteId)}
+        />
+      )}
+      <Navbar mode={mode} toggleMode={toggleModeHandler} />
       <CreateNoteForm
         formDataHandler={formDataHandler}
         formData={formData}
@@ -98,7 +140,7 @@ function App() {
                   desc={item.desc}
                   color={item.color}
                   date={item.date}
-                  deleteHandler={() => deleteHandler(item.id)}
+                  openModel={() => openModel(item.id)}
                 />
               </div>
             ))}

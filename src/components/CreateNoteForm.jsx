@@ -1,33 +1,53 @@
 /* eslint-disable react/prop-types */
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function CreateNoteForm(props) {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [color, setColor] = useState("#D4C2FF");
+  // const [title, setTitle] = useState("");
+  // const [desc, setDesc] = useState("");
+  // const [color, setColor] = useState("#D4C2FF");
 
-  const titleChangeHandler = (event) => {
-    setTitle(event.target.value);
+  const [enteredData, setEnteredData] = useState({
+    title: "",
+    desc: "",
+    color: "#D4C2FF",
+  });
+
+  const inputChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setEnteredData((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
-  const descChangeHandler = (event) => {
-    setDesc(event.target.value);
-  };
-  const colorChangeHandler = (event) => {
-    setColor(event.target.value);
-  };
+
+  // const titleChangeHandler = (event) => {
+  //   setTitle(event.target.value);
+  // };
+  // const descChangeHandler = (event) => {
+  //   setDesc(event.target.value);
+  // };
+  // const colorChangeHandler = (event) => {
+  //   setColor(event.target.value);
+  // };
 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.formDataHandler(title, desc, color);
-    setTitle("");
-    setDesc("");
-    setColor("#D4C2FF");
+    if (enteredData.title === "" || enteredData.desc === "") {
+      return;
+    }
+    props.formDataHandler(enteredData);
+    // props.formDataHandler(title,color,desc);
+    setEnteredData({
+      title: "",
+      desc: "",
+      color: "#D4C2FF",
+    });
+    // setTitle("");
+    // setDesc("");
+    // setColor("#D4C2FF");
   };
-
-  useEffect(() => {
-    localStorage.setItem("noteData", JSON.stringify(props.formData));
-  }, [props.formData]);
 
   return (
     <>
@@ -44,8 +64,8 @@ export default function CreateNoteForm(props) {
               id="title"
               name="title"
               placeholder="Enter Title..."
-              onChange={titleChangeHandler}
-              value={title}
+              onChange={inputChangeHandler}
+              value={enteredData.title}
             />
           </div>
           <div className="mb-3">
@@ -58,18 +78,19 @@ export default function CreateNoteForm(props) {
               rows="4"
               name="desc"
               placeholder="Enter Description..."
-              value={desc}
-              onChange={descChangeHandler}></textarea>
+              value={enteredData.desc}
+              onChange={inputChangeHandler}></textarea>
           </div>
           <label htmlFor="color" className="form-label">
             Note Color
           </label>
           <input
             type="color"
+            name="color"
             className="form-control form-control-color"
             id="color"
-            value={color}
-            onChange={colorChangeHandler}
+            value={enteredData.color}
+            onChange={inputChangeHandler}
             title="Choose your color"></input>
 
           <button className="btn btn-primary mt-4">Submit</button>
